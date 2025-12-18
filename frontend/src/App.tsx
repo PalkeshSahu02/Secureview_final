@@ -1,0 +1,60 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+
+// Layout
+import MainLayout from './components/layout/MainLayout';
+
+// Auth Pages
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import VerifyPIN from './pages/auth/VerifyPIN';
+
+// Dashboard
+import Dashboard from './pages/dashboard/Dashboard';
+
+// Documents
+import DocumentList from './pages/documents/DocumentList';
+import DocumentUpload from './pages/documents/DocumentUpload';
+
+// Users
+import UserList from './pages/users/UserList';
+
+// Viewer
+import SecureViewer from './components/viewer/SecureViewer';
+
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/verify-pin" element={<VerifyPIN />} />
+
+          {/* Protected routes */}
+          <Route element={<MainLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/documents" element={<DocumentList mode="my" />} />
+            <Route path="/documents/upload" element={<DocumentUpload />} />
+            <Route path="/shared" element={<DocumentList mode="shared" />} />
+            <Route path="/documents/all" element={<DocumentList mode="all" />} />
+            <Route path="/users" element={<UserList />} />
+            <Route path="/invitations" element={<UserList />} />
+            <Route path="/settings" element={<Dashboard />} />
+          </Route>
+
+          {/* Secure viewer (full screen, outside layout) */}
+          <Route path="/viewer/:id" element={<SecureViewer />} />
+
+          {/* Default redirect */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
+
+export default App;

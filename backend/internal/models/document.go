@@ -183,7 +183,7 @@ type ViewingSession struct {
 	IPAddress       string     `gorm:"size:45" json:"ip_address"`
 	City            string     `gorm:"size:100" json:"city,omitempty"`
 	Country         string     `gorm:"size:100" json:"country,omitempty"`
-	Browser         string     `gorm:"size:100" json:"browser,omitempty"`
+	Browser         string     `gorm:"size:500" json:"browser,omitempty"`
 	OS              string     `gorm:"size:100" json:"os,omitempty"`
 	DeviceType      string     `gorm:"size:50" json:"device_type,omitempty"`
 	StartedAt       time.Time  `gorm:"not null" json:"started_at"`

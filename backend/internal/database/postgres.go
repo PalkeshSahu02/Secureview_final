@@ -95,7 +95,29 @@ func Migrate(db *gorm.DB) error {
 		log.Printf("Warning: Some indexes may not have been created: %v", err)
 	}
 
+	// Run manual migrations for schema changes that AutoMigrate doesn't handle
+	if err := runManualMigrations(db); err != nil {
+		log.Printf("Warning: Some manual migrations may have failed: %v", err)
+	}
+
 	log.Println("Database migrations completed successfully")
+	return nil
+}
+
+// runManualMigrations handles schema changes that GORM AutoMigrate doesn't apply
+func runManualMigrations(db *gorm.DB) error {
+	migrations := []string{
+		// Fix Browser column size - User-Agent strings can be very long
+		`ALTER TABLE viewing_sessions ALTER COLUMN browser TYPE varchar(500)`,
+	}
+
+	for _, migration := range migrations {
+		if err := db.Exec(migration).Error; err != nil {
+			// Log but don't fail - the migration might already be applied
+			log.Printf("Migration note: %v (this may be expected if already applied)", err)
+		}
+	}
+
 	return nil
 }
 

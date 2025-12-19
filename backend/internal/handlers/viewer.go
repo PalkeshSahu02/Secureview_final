@@ -49,6 +49,10 @@ func (h *ViewerHandler) InitViewingSession(c *gin.Context) {
 	// Get client information
 	clientIP := utils.GetClientIPFromGin(c.ClientIP(), c.Request.Header)
 	browser := c.GetHeader("User-Agent")
+	// Truncate browser string to avoid database column overflow
+	if len(browser) > 500 {
+		browser = browser[:500]
+	}
 
 	input := services.InitViewingSessionInput{
 		DocumentID: docID,

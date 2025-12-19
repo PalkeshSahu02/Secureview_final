@@ -186,11 +186,11 @@ type ViewingSession struct {
 	Browser         string     `gorm:"size:100" json:"browser,omitempty"`
 	OS              string     `gorm:"size:100" json:"os,omitempty"`
 	DeviceType      string     `gorm:"size:50" json:"device_type,omitempty"`
-	StartedAt       time.Time  `gorm:"autoCreateTime" json:"started_at"`
-	LastActivityAt  time.Time  `gorm:"autoUpdateTime" json:"last_activity_at"`
+	StartedAt       time.Time  `gorm:"not null" json:"started_at"`
+	LastActivityAt  time.Time  `gorm:"not null" json:"last_activity_at"`
 	EndedAt         *time.Time `json:"ended_at,omitempty"`
 	DurationSeconds int        `json:"duration_seconds"`
-	PagesViewed     []int      `gorm:"type:integer[]" json:"pages_viewed,omitempty"`
+	PagesViewed     IntArray   `gorm:"type:jsonb;default:'[]'" json:"pages_viewed,omitempty"`
 	IsActive        bool       `gorm:"default:true" json:"is_active"`
 
 	// Relations

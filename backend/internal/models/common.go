@@ -32,6 +32,32 @@ func (j *JSONB) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, j)
 }
 
+// IntArray is a custom type for storing integer arrays as JSONB
+type IntArray []int
+
+// Value implements the driver.Valuer interface
+func (a IntArray) Value() (driver.Value, error) {
+	if a == nil {
+		return "[]", nil
+	}
+	return json.Marshal(a)
+}
+
+// Scan implements the sql.Scanner interface
+func (a *IntArray) Scan(value interface{}) error {
+	if value == nil {
+		*a = []int{}
+		return nil
+	}
+
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed for IntArray")
+	}
+
+	return json.Unmarshal(bytes, a)
+}
+
 // UserRole defines the roles available in the system
 type UserRole string
 

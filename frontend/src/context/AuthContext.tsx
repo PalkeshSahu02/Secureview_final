@@ -35,7 +35,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isPINVerified, setIsPINVerified] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(() => {
+    // Initialize from sessionStorage on first load
+    return sessionStorage.getItem('session_id');
+  });
 
   const isAuthenticated = !!user && !!getAccessToken();
 
@@ -52,9 +55,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           if (storedPINVerified === 'true') {
             setIsPINVerified(true);
           }
+          // Restore session ID from storage
+          const storedSessionId = sessionStorage.getItem('session_id');
+          if (storedSessionId) {
+            setSessionId(storedSessionId);
+          }
         } catch (error) {
           console.error('Failed to load user:', error);
           clearTokens();
+          sessionStorage.removeItem('session_id');
+          sessionStorage.removeItem('pin_verified');
         }
       }
       setIsLoading(false);
@@ -67,6 +77,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const response = await authApi.login(data);
     setUser(response.user);
     setSessionId(response.session_id);
+    // Persist session ID to sessionStorage
+    sessionStorage.setItem('session_id', response.session_id);
     setIsPINVerified(false);
     sessionStorage.removeItem('pin_verified');
   }, []);
@@ -101,6 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null);
       setIsPINVerified(false);
       setSessionId(null);
+      sessionStorage.removeItem('session_id');
       sessionStorage.removeItem('pin_verified');
     }
   }, []);

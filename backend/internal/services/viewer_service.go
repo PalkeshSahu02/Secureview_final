@@ -122,16 +122,20 @@ func (s *ViewerService) InitViewingSession(input InitViewingSessionInput) (*View
 		}
 	}
 
-	// Create viewing session
+	// Create viewing session with explicit timestamps
+	now := time.Now()
 	viewingSession := &models.ViewingSession{
-		DocumentID:   input.DocumentID,
-		UserID:       input.UserID,
-		SessionToken: sessionToken,
-		IPAddress:    input.IPAddress,
-		Browser:      input.Browser,
-		OS:           input.OS,
-		DeviceType:   input.DeviceType,
-		IsActive:     true,
+		DocumentID:     input.DocumentID,
+		UserID:         input.UserID,
+		SessionToken:   sessionToken,
+		IPAddress:      input.IPAddress,
+		Browser:        input.Browser,
+		OS:             input.OS,
+		DeviceType:     input.DeviceType,
+		StartedAt:      now,
+		LastActivityAt: now,
+		PagesViewed:    models.IntArray{},
+		IsActive:       true,
 	}
 
 	if ipInfo != nil {

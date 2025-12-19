@@ -1,5 +1,5 @@
 import React from 'react';
-import { WatermarkData } from '../../types';
+import type { WatermarkData } from '../../types';
 
 interface WatermarkProps {
   data: WatermarkData;

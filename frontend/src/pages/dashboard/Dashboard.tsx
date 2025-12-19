@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, Share2, Users, Clock, Upload, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { documentsApi, ListDocumentsResponse } from '../../api/documents';
+import { documentsApi } from '../../api/documents';
+import type { ListDocumentsResponse } from '../../api/documents';
 import Button from '../../components/common/Button';
 
 interface StatCardProps {

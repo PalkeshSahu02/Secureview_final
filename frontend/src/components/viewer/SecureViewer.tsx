@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { viewerApi } from '../../api/viewer';
-import { WatermarkData } from '../../types';
+import type { WatermarkData } from '../../types';
 import Watermark from './Watermark';
 
 const SecureViewer: React.FC = () => {
@@ -17,7 +17,7 @@ const SecureViewer: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isBlurred, setIsBlurred] = useState(false);
-  const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
+  const heartbeatRef = useRef<number | null>(null);
 
   // Initialize viewing session
   useEffect(() => {

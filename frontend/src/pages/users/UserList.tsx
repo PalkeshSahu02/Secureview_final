@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, UserPlus, Search, MoreVertical, Mail, Shield, UserX } from 'lucide-react';
-import { usersApi, ListUsersResponse } from '../../api/users';
-import { User, UserRole } from '../../types';
+import { usersApi } from '../../api/users';
+import type { ListUsersResponse } from '../../api/users';
+import type { User, UserRole } from '../../types';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Modal from '../../components/common/Modal';

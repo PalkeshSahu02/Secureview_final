@@ -86,8 +86,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = useCallback(async (data: RegisterRequest) => {
     const response = await authApi.register(data);
     setUser(response.user);
-    setIsPINVerified(true); // PIN is set during registration
-    sessionStorage.setItem('pin_verified', 'true');
+    setSessionId(response.session_id);
+    sessionStorage.setItem('session_id', response.session_id);
+    // User still needs to verify PIN after registration
+    setIsPINVerified(false);
+    sessionStorage.removeItem('pin_verified');
   }, []);
 
   const verifyPIN = useCallback(async (pin: string) => {
@@ -102,8 +105,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const acceptInvitation = useCallback(async (data: AcceptInvitationRequest) => {
     const response = await authApi.acceptInvitation(data);
     setUser(response.user);
-    setIsPINVerified(true);
-    sessionStorage.setItem('pin_verified', 'true');
+    setSessionId(response.session_id);
+    sessionStorage.setItem('session_id', response.session_id);
+    // User still needs to verify PIN after accepting invitation
+    setIsPINVerified(false);
+    sessionStorage.removeItem('pin_verified');
   }, []);
 
   const logout = useCallback(async () => {

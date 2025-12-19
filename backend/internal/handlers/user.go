@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"secureview/internal/middleware"
@@ -212,28 +213,36 @@ func (h *UserHandler) DeactivateUser(c *gin.Context) {
 // CreateInvitation creates a new user invitation
 // POST /api/v1/invitations
 func (h *UserHandler) CreateInvitation(c *gin.Context) {
+	log.Println("[UserHandler] CreateInvitation - starting")
+
 	orgID, ok := middleware.GetCurrentOrgID(c)
 	if !ok {
+		log.Println("[UserHandler] CreateInvitation - no org context")
 		c.JSON(http.StatusForbidden, gin.H{
 			"error":   "forbidden",
 			"message": "Organization context required",
 		})
 		return
 	}
+	log.Printf("[UserHandler] CreateInvitation - orgID: %s\n", orgID)
 
 	currentUserID, _ := middleware.GetCurrentUserID(c)
+	log.Printf("[UserHandler] CreateInvitation - currentUserID: %s\n", currentUserID)
 
 	var input services.CreateInvitationInput
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("[UserHandler] CreateInvitation - validation error: %v\n", err)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "validation_error",
 			"message": err.Error(),
 		})
 		return
 	}
+	log.Printf("[UserHandler] CreateInvitation - input: email=%s, role=%s\n", input.Email, input.Role)
 
 	invitation, err := h.userService.CreateInvitation(input, orgID, currentUserID)
 	if err != nil {
+		log.Printf("[UserHandler] CreateInvitation - error: %v\n", err)
 		status := http.StatusInternalServerError
 		if err == services.ErrUserAlreadyExists {
 			status = http.StatusConflict
@@ -245,6 +254,7 @@ func (h *UserHandler) CreateInvitation(c *gin.Context) {
 		return
 	}
 
+	log.Printf("[UserHandler] CreateInvitation - success: id=%s\n", invitation.ID)
 	c.JSON(http.StatusCreated, gin.H{
 		"message":    "Invitation created successfully",
 		"invitation": invitation,
@@ -255,17 +265,22 @@ func (h *UserHandler) CreateInvitation(c *gin.Context) {
 // ListInvitations returns pending invitations
 // GET /api/v1/invitations
 func (h *UserHandler) ListInvitations(c *gin.Context) {
+	log.Println("[UserHandler] ListInvitations - starting")
+
 	orgID, ok := middleware.GetCurrentOrgID(c)
 	if !ok {
+		log.Println("[UserHandler] ListInvitations - no org context")
 		c.JSON(http.StatusForbidden, gin.H{
 			"error":   "forbidden",
 			"message": "Organization context required",
 		})
 		return
 	}
+	log.Printf("[UserHandler] ListInvitations - orgID: %s\n", orgID)
 
 	invitations, err := h.userService.ListInvitations(orgID)
 	if err != nil {
+		log.Printf("[UserHandler] ListInvitations - error: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "list_failed",
 			"message": err.Error(),
@@ -273,6 +288,7 @@ func (h *UserHandler) ListInvitations(c *gin.Context) {
 		return
 	}
 
+	log.Printf("[UserHandler] ListInvitations - found %d invitations\n", len(invitations))
 	c.JSON(http.StatusOK, gin.H{
 		"invitations": invitations,
 	})

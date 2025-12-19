@@ -22,20 +22,71 @@ const SecureViewer: React.FC = () => {
   // Initialize viewing session
   useEffect(() => {
     const initSession = async () => {
-      if (!id) return;
+      if (!id) {
+        console.error('[SecureViewer] No document ID provided');
+        setError('No document ID provided');
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('[SecureViewer] Starting initialization for document:', id);
 
       try {
+        console.log('[SecureViewer] Step 1: Initializing viewing session...');
         const response = await viewerApi.initSession(id);
+        console.log('[SecureViewer] Step 1 complete:', {
+          hasWatermark: !!response.watermark_data,
+          pageCount: response.page_count,
+          document: response.document?.title
+        });
+
         setWatermarkData(response.watermark_data);
         setTotalPages(response.page_count || 1);
 
-        // Get first page
+        console.log('[SecureViewer] Step 2: Getting first page...');
         const blob = await viewerApi.getPage(id, 1);
+        console.log('[SecureViewer] Step 2 complete:', { blobSize: blob.size, blobType: blob.type });
+
         const url = URL.createObjectURL(blob);
         setDocumentUrl(url);
+        console.log('[SecureViewer] Document loaded successfully');
       } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load document';
-        setError(errorMessage);
+        console.error('[SecureViewer] Error loading document:', err);
+
+        // Extract detailed error message
+        let errorMessage = 'Failed to load document';
+        let errorDetails = '';
+
+        if (err && typeof err === 'object') {
+          const axiosError = err as { response?: { status?: number; data?: { message?: string; error?: string } }; message?: string };
+
+          if (axiosError.response) {
+            const status = axiosError.response.status;
+            const data = axiosError.response.data;
+
+            errorDetails = `Status: ${status}`;
+
+            if (status === 403) {
+              errorMessage = data?.message || 'Access denied. You may need to verify your PIN or you don\'t have permission to view this document.';
+            } else if (status === 404) {
+              errorMessage = 'Document not found. It may have been deleted or you have an invalid link.';
+            } else if (status === 401) {
+              errorMessage = 'Session expired. Please log in again.';
+            } else if (status === 500) {
+              errorMessage = data?.message || 'Server error. The document file may be missing or corrupted.';
+              errorDetails += ` - ${data?.error || 'Internal server error'}`;
+            } else {
+              errorMessage = data?.message || `Request failed with status ${status}`;
+            }
+          } else if (axiosError.message) {
+            errorMessage = axiosError.message;
+          }
+        } else if (err instanceof Error) {
+          errorMessage = err.message;
+        }
+
+        console.error('[SecureViewer] Error details:', { errorMessage, errorDetails });
+        setError(`${errorMessage}${errorDetails ? ` (${errorDetails})` : ''}`);
       } finally {
         setIsLoading(false);
       }

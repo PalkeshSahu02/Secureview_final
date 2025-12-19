@@ -19,6 +19,7 @@ import DocumentUpload from './pages/documents/DocumentUpload';
 
 // Users
 import UserList from './pages/users/UserList';
+import InviteUser from './pages/users/InviteUser';
 
 // Viewer
 import SecureViewer from './components/viewer/SecureViewer';
@@ -41,7 +42,8 @@ function App() {
             <Route path="/shared" element={<DocumentList mode="shared" />} />
             <Route path="/documents/all" element={<DocumentList mode="all" />} />
             <Route path="/users" element={<UserList />} />
-            <Route path="/invitations" element={<UserList />} />
+            <Route path="/invitations" element={<InviteUser />} />
+            <Route path="/users/invite" element={<InviteUser />} />
             <Route path="/settings" element={<Dashboard />} />
           </Route>
 

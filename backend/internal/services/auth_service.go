@@ -58,6 +58,7 @@ type RegisterOrganizationResult struct {
 	User         *models.User         `json:"user"`
 	AccessToken  string               `json:"access_token"`
 	RefreshToken string               `json:"refresh_token"`
+	SessionID    uuid.UUID            `json:"session_id"`
 }
 
 // RegisterOrganization registers a new organization with its admin user
@@ -148,6 +149,7 @@ func (s *AuthService) RegisterOrganization(input RegisterOrganizationInput) (*Re
 		result.User = user
 		result.AccessToken = accessToken
 		result.RefreshToken = refreshToken
+		result.SessionID = session.ID
 
 		return nil
 	})
@@ -401,6 +403,7 @@ func (s *AuthService) AcceptInvitation(input AcceptInvitationInput) (*RegisterOr
 		result.User = user
 		result.AccessToken = accessToken
 		result.RefreshToken = refreshToken
+		result.SessionID = session.ID
 
 		return nil
 	})

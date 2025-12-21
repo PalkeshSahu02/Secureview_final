@@ -521,71 +521,66 @@ const SecureViewer: React.FC = () => {
         )}
       </div>
 
-      {/* Document Content - Full Screen */}
+      {/* Document Content - TRUE Full Screen */}
       <div
         ref={containerRef}
-        className="absolute inset-0 top-14 bottom-20 overflow-auto flex items-center justify-center bg-slate-800/50"
+        className="absolute top-14 bottom-12 left-0 right-0 overflow-hidden bg-slate-900"
         onDragStart={(e) => e.preventDefault()}
       >
-        <div
-          className="relative w-full h-full flex items-center justify-center"
-          style={{
-            transform: `scale(${zoom / 100})`,
-            transformOrigin: 'center center',
-          }}
-        >
-          {/* Document - Full Width/Height */}
-          {documentUrl && (
-            <div className="relative w-full h-full max-w-[95vw] max-h-[calc(100vh-180px)]">
-              <iframe
-                ref={iframeRef}
-                src={`${documentUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
-                className="w-full h-full bg-white rounded-lg shadow-2xl"
-                style={{
-                  pointerEvents: isBlurred ? 'none' : 'auto',
-                  minHeight: 'calc(100vh - 200px)',
-                }}
-                title="Document Viewer"
-              />
-              {/* Watermark Overlay on top of PDF */}
-              {watermarkData && (
-                <div className="absolute inset-0 pointer-events-none">
-                  <Watermark data={watermarkData} geoLocation={geoLocation} />
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        {/* Document - Full Width/Height with zoom */}
+        {documentUrl && (
+          <div
+            className="relative w-full h-full"
+            style={{
+              transform: `scale(${zoom / 100})`,
+              transformOrigin: 'top left',
+              width: `${10000 / zoom}%`,
+              height: `${10000 / zoom}%`,
+            }}
+          >
+            <iframe
+              ref={iframeRef}
+              src={`${documentUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH,FitV&pagemode=none`}
+              className="w-full h-full border-0"
+              style={{
+                pointerEvents: isBlurred ? 'none' : 'auto',
+                backgroundColor: 'white',
+              }}
+              title="Document Viewer"
+            />
+            {/* Watermark Overlay on top of PDF */}
+            {watermarkData && (
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <Watermark data={watermarkData} geoLocation={geoLocation} />
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Footer with detailed info */}
-      <div className="absolute bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-sm text-white px-4 py-3 z-40 border-t border-slate-700">
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-slate-400">Secure Session Active</span>
-            </div>
-            <span className="text-slate-300">
-              {watermarkData?.user_name} ({watermarkData?.user_email})
-            </span>
-            <span className="text-slate-500">|</span>
-            <span className="text-slate-400">{watermarkData?.organization}</span>
+      {/* Compact Footer */}
+      <div className="absolute bottom-0 left-0 right-0 h-12 bg-slate-900/95 backdrop-blur-sm text-white px-4 flex items-center justify-between z-40 border-t border-slate-700">
+        <div className="flex items-center space-x-3 text-[10px]">
+          <div className="flex items-center space-x-1">
+            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-slate-400">SECURE</span>
           </div>
-          <div className="flex items-center space-x-4">
-            {geoLocation && (
-              <>
-                <span className="text-slate-400">
-                  <MapPin className="w-3 h-3 inline mr-1" />
-                  {geoLocation.latitude.toFixed(4)}, {geoLocation.longitude.toFixed(4)}
-                </span>
-                <span className="text-slate-500">|</span>
-              </>
-            )}
-            <span className="text-slate-400">{watermarkData?.ip_address}</span>
-            <span className="text-slate-500">|</span>
-            <span className="text-slate-400">{new Date().toLocaleString()}</span>
-          </div>
+          <span className="text-slate-300">{watermarkData?.user_name}</span>
+          <span className="text-slate-500">•</span>
+          <span className="text-slate-400">{watermarkData?.organization}</span>
+        </div>
+        <div className="flex items-center space-x-3 text-[10px]">
+          {geoLocation && (
+            <>
+              <span className="text-emerald-400 font-mono">
+                {geoLocation.latitude.toFixed(4)}, {geoLocation.longitude.toFixed(4)}
+              </span>
+              <span className="text-slate-500">•</span>
+            </>
+          )}
+          <span className="text-slate-400">{watermarkData?.ip_address}</span>
+          <span className="text-slate-500">•</span>
+          <span className="text-slate-400">{new Date().toLocaleTimeString()}</span>
         </div>
       </div>
     </div>

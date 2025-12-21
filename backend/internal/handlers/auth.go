@@ -51,6 +51,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		"user":          result.User,
 		"access_token":  result.AccessToken,
 		"refresh_token": result.RefreshToken,
+		"session_id":    result.SessionID,
 	})
 }
 
@@ -234,6 +235,7 @@ func (h *AuthHandler) AcceptInvitation(c *gin.Context) {
 		"user":          result.User,
 		"access_token":  result.AccessToken,
 		"refresh_token": result.RefreshToken,
+		"session_id":    result.SessionID,
 	})
 }
 

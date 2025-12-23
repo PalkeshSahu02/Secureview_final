@@ -30,6 +30,14 @@ export interface CreateInvitationParams {
   role: UserRole;
 }
 
+export interface CreateInvitationResponse {
+  message: string;
+  invitation: Invitation;
+  invite_url: string;
+  invite_token: string;
+  email_sent: boolean;
+}
+
 export const usersApi = {
   // List users
   list: async (params: ListUsersParams = {}): Promise<ListUsersResponse> => {
@@ -152,12 +160,16 @@ export const usersApi = {
   },
 
   // Create invitation
-  createInvitation: async (data: CreateInvitationParams): Promise<Invitation> => {
+  createInvitation: async (data: CreateInvitationParams): Promise<CreateInvitationResponse> => {
     console.log('[Users] Creating invitation...', { email: data.email, role: data.role });
     try {
       const response = await apiClient.post('/invitations', data);
-      console.log('[Users] Invitation created', { id: response.data.invitation?.id });
-      return response.data.invitation;
+      console.log('[Users] Invitation created', {
+        id: response.data.invitation?.id,
+        token: response.data.invite_token,
+        email_sent: response.data.email_sent
+      });
+      return response.data;
     } catch (error) {
       console.error('[Users] Failed to create invitation', error);
       throw error;

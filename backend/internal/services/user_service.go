@@ -229,8 +229,14 @@ type CreateInvitationInput struct {
 	Role  models.UserRole `json:"role" binding:"required"`
 }
 
+// CreateInvitationResult represents the result of creating an invitation
+type CreateInvitationResult struct {
+	Invitation *models.Invitation
+	EmailSent  bool
+}
+
 // CreateInvitation creates a new invitation and sends an email
-func (s *UserService) CreateInvitation(input CreateInvitationInput, orgID uuid.UUID, invitedBy uuid.UUID) (*models.Invitation, error) {
+func (s *UserService) CreateInvitation(input CreateInvitationInput, orgID uuid.UUID, invitedBy uuid.UUID) (*CreateInvitationResult, error) {
 	// Check if user already exists in this org
 	var existingUser models.User
 	if err := s.db.Where("email = ? AND organization_id = ?", input.Email, orgID).First(&existingUser).Error; err == nil {
@@ -262,14 +268,19 @@ func (s *UserService) CreateInvitation(input CreateInvitationInput, orgID uuid.U
 		}
 
 		// Send invitation email
-		if s.emailService != nil {
+		emailSent := false
+		if s.emailService != nil && s.cfg.Email.Enabled {
 			if err := s.emailService.SendInvitationEmail(&existingInvitation, inviter.Name, org.Name); err != nil {
-				// Log but don't fail - invitation was created successfully
 				fmt.Printf("[UserService] Warning: failed to send invitation email: %v\n", err)
+			} else {
+				emailSent = true
 			}
 		}
 
-		return &existingInvitation, nil
+		return &CreateInvitationResult{
+			Invitation: &existingInvitation,
+			EmailSent:  emailSent,
+		}, nil
 	}
 
 	// Generate invite token
@@ -294,14 +305,19 @@ func (s *UserService) CreateInvitation(input CreateInvitationInput, orgID uuid.U
 	}
 
 	// Send invitation email
-	if s.emailService != nil {
+	emailSent := false
+	if s.emailService != nil && s.cfg.Email.Enabled {
 		if err := s.emailService.SendInvitationEmail(invitation, inviter.Name, org.Name); err != nil {
-			// Log but don't fail - invitation was created successfully
 			fmt.Printf("[UserService] Warning: failed to send invitation email: %v\n", err)
+		} else {
+			emailSent = true
 		}
 	}
 
-	return invitation, nil
+	return &CreateInvitationResult{
+		Invitation: invitation,
+		EmailSent:  emailSent,
+	}, nil
 }
 
 // ListInvitations returns pending invitations for an organization

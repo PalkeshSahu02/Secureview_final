@@ -67,10 +67,16 @@ const InviteUser: React.FC = () => {
 
       // Generate the full invite link
       const baseUrl = window.location.origin;
-      const link = `${baseUrl}/accept-invite?token=${response.invite_token || response.invitation?.token}`;
+      const token = response.invite_token || response.invitation?.token;
+      const link = `${baseUrl}/accept-invite?token=${token}`;
       setInviteLink(link);
 
-      setSuccess(`Invitation sent to ${email}! An email has been sent with the registration link.`);
+      // Show appropriate success message based on email status
+      if (response.email_sent) {
+        setSuccess(`Invitation sent to ${email}! An email has been sent with the registration link.`);
+      } else {
+        setSuccess(`Invitation created for ${email}. Share the link below manually (email sending is not configured).`);
+      }
       setEmail('');
       setName('');
       setRole('member');

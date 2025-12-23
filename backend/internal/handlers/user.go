@@ -240,7 +240,7 @@ func (h *UserHandler) CreateInvitation(c *gin.Context) {
 	}
 	log.Printf("[UserHandler] CreateInvitation - input: email=%s, role=%s\n", input.Email, input.Role)
 
-	invitation, err := h.userService.CreateInvitation(input, orgID, currentUserID)
+	result, err := h.userService.CreateInvitation(input, orgID, currentUserID)
 	if err != nil {
 		log.Printf("[UserHandler] CreateInvitation - error: %v\n", err)
 		status := http.StatusInternalServerError
@@ -254,13 +254,13 @@ func (h *UserHandler) CreateInvitation(c *gin.Context) {
 		return
 	}
 
-	log.Printf("[UserHandler] CreateInvitation - success: id=%s\n", invitation.ID)
+	log.Printf("[UserHandler] CreateInvitation - success: id=%s, email_sent=%v\n", result.Invitation.ID, result.EmailSent)
 	c.JSON(http.StatusCreated, gin.H{
 		"message":      "Invitation created successfully",
-		"invitation":   invitation,
-		"invite_url":   "/accept-invite?token=" + invitation.Token,
-		"invite_token": invitation.Token,
-		"email_sent":   true,
+		"invitation":   result.Invitation,
+		"invite_url":   "/accept-invite?token=" + result.Invitation.Token,
+		"invite_token": result.Invitation.Token,
+		"email_sent":   result.EmailSent,
 	})
 }
 

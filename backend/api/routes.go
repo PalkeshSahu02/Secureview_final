@@ -25,7 +25,8 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	// Initialize services
 	auditService := services.NewAuditService(db)
 	authService := services.NewAuthService(db, cfg, jwtManager)
-	userService := services.NewUserService(db, cfg)
+	emailService := services.NewEmailService(cfg)
+	userService := services.NewUserService(db, cfg, emailService)
 	docService := services.NewDocumentService(db, cfg, auditService)
 	viewerService := services.NewViewerService(db, cfg, docService, auditService)
 

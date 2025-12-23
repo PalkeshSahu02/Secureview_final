@@ -256,9 +256,11 @@ func (h *UserHandler) CreateInvitation(c *gin.Context) {
 
 	log.Printf("[UserHandler] CreateInvitation - success: id=%s\n", invitation.ID)
 	c.JSON(http.StatusCreated, gin.H{
-		"message":    "Invitation created successfully",
-		"invitation": invitation,
-		"invite_url": "/accept-invite?token=" + invitation.Token,
+		"message":      "Invitation created successfully",
+		"invitation":   invitation,
+		"invite_url":   "/accept-invite?token=" + invitation.Token,
+		"invite_token": invitation.Token,
+		"email_sent":   true,
 	})
 }
 

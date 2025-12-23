@@ -21,15 +21,17 @@ var (
 
 // UserService handles user-related business logic
 type UserService struct {
-	db  *gorm.DB
-	cfg *config.Config
+	db           *gorm.DB
+	cfg          *config.Config
+	emailService *EmailService
 }
 
 // NewUserService creates a new UserService
-func NewUserService(db *gorm.DB, cfg *config.Config) *UserService {
+func NewUserService(db *gorm.DB, cfg *config.Config, emailService *EmailService) *UserService {
 	return &UserService{
-		db:  db,
-		cfg: cfg,
+		db:           db,
+		cfg:          cfg,
+		emailService: emailService,
 	}
 }
 
@@ -227,12 +229,24 @@ type CreateInvitationInput struct {
 	Role  models.UserRole `json:"role" binding:"required"`
 }
 
-// CreateInvitation creates a new invitation
+// CreateInvitation creates a new invitation and sends an email
 func (s *UserService) CreateInvitation(input CreateInvitationInput, orgID uuid.UUID, invitedBy uuid.UUID) (*models.Invitation, error) {
 	// Check if user already exists in this org
 	var existingUser models.User
 	if err := s.db.Where("email = ? AND organization_id = ?", input.Email, orgID).First(&existingUser).Error; err == nil {
 		return nil, ErrUserAlreadyExists
+	}
+
+	// Get inviter info for the email
+	var inviter models.User
+	if err := s.db.Where("id = ?", invitedBy).First(&inviter).Error; err != nil {
+		return nil, fmt.Errorf("failed to get inviter: %w", err)
+	}
+
+	// Get organization info for the email
+	var org models.Organization
+	if err := s.db.Where("id = ?", orgID).First(&org).Error; err != nil {
+		return nil, fmt.Errorf("failed to get organization: %w", err)
 	}
 
 	// Check if invitation already exists and is pending
@@ -246,6 +260,15 @@ func (s *UserService) CreateInvitation(input CreateInvitationInput, orgID uuid.U
 		if err := s.db.Save(&existingInvitation).Error; err != nil {
 			return nil, fmt.Errorf("failed to update invitation: %w", err)
 		}
+
+		// Send invitation email
+		if s.emailService != nil {
+			if err := s.emailService.SendInvitationEmail(&existingInvitation, inviter.Name, org.Name); err != nil {
+				// Log but don't fail - invitation was created successfully
+				fmt.Printf("[UserService] Warning: failed to send invitation email: %v\n", err)
+			}
+		}
+
 		return &existingInvitation, nil
 	}
 
@@ -268,6 +291,14 @@ func (s *UserService) CreateInvitation(input CreateInvitationInput, orgID uuid.U
 
 	if err := s.db.Create(invitation).Error; err != nil {
 		return nil, fmt.Errorf("failed to create invitation: %w", err)
+	}
+
+	// Send invitation email
+	if s.emailService != nil {
+		if err := s.emailService.SendInvitationEmail(invitation, inviter.Name, org.Name); err != nil {
+			// Log but don't fail - invitation was created successfully
+			fmt.Printf("[UserService] Warning: failed to send invitation email: %v\n", err)
+		}
 	}
 
 	return invitation, nil

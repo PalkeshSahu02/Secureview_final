@@ -29,6 +29,9 @@ type Config struct {
 
 	// Security settings
 	Security SecurityConfig
+
+	// Email configuration
+	Email EmailConfig
 }
 
 // ServerConfig holds HTTP server settings
@@ -82,6 +85,18 @@ type SecurityConfig struct {
 	RateLimitWindow    time.Duration
 }
 
+// EmailConfig holds SMTP email settings
+type EmailConfig struct {
+	SMTPHost     string
+	SMTPPort     int
+	SMTPUsername string
+	SMTPPassword string
+	FromEmail    string
+	FromName     string
+	Enabled      bool
+	AppURL       string // Frontend URL for invitation links
+}
+
 // Load reads configuration from environment variables
 func Load() *Config {
 	// Load .env file if it exists (ignore error if not found)
@@ -127,6 +142,16 @@ func Load() *Config {
 			RateLimitRequests:  getEnvInt("RATE_LIMIT_REQUESTS", 100),
 			RateLimitWindow:    getEnvDuration("RATE_LIMIT_WINDOW", time.Minute),
 		},
+		Email: EmailConfig{
+			SMTPHost:     getEnv("SMTP_HOST", ""),
+			SMTPPort:     getEnvInt("SMTP_PORT", 587),
+			SMTPUsername: getEnv("SMTP_USERNAME", ""),
+			SMTPPassword: getEnv("SMTP_PASSWORD", ""),
+			FromEmail:    getEnv("SMTP_FROM_EMAIL", "noreply@secureview.app"),
+			FromName:     getEnv("SMTP_FROM_NAME", "SecureView"),
+			Enabled:      getEnvBool("SMTP_ENABLED", false),
+			AppURL:       getEnv("APP_URL", "http://localhost:5173"),
+		},
 	}
 }
 
@@ -143,6 +168,15 @@ func getEnvInt(key string, defaultValue int) int {
 	if value := os.Getenv(key); value != "" {
 		if intValue, err := strconv.Atoi(value); err == nil {
 			return intValue
+		}
+	}
+	return defaultValue
+}
+
+func getEnvBool(key string, defaultValue bool) bool {
+	if value := os.Getenv(key); value != "" {
+		if boolValue, err := strconv.ParseBool(value); err == nil {
+			return boolValue
 		}
 	}
 	return defaultValue

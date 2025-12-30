@@ -110,3 +110,101 @@ func (s *AuditService) GetUserActivityLogs(userID uuid.UUID, page, pageSize int)
 
 	return logs, total, nil
 }
+
+// ActivityLogFilter contains filter options for activity logs
+type ActivityLogFilter struct {
+	OrganizationID uuid.UUID
+	EventType      string
+	DocumentID     *uuid.UUID
+	UserID         *uuid.UUID
+	StartDate      *string
+	EndDate        *string
+	Page           int
+	PageSize       int
+}
+
+// ActivityLogResult contains the paginated activity log response
+type ActivityLogResult struct {
+	Logs       []models.AuditLog `json:"logs"`
+	Total      int64             `json:"total"`
+	Page       int               `json:"page"`
+	PageSize   int               `json:"page_size"`
+	TotalPages int               `json:"total_pages"`
+}
+
+// GetFilteredLogs returns filtered and paginated activity logs
+func (s *AuditService) GetFilteredLogs(filter ActivityLogFilter) (*ActivityLogResult, error) {
+	if filter.Page < 1 {
+		filter.Page = 1
+	}
+	if filter.PageSize < 1 || filter.PageSize > 100 {
+		filter.PageSize = 20
+	}
+
+	query := s.db.Model(&models.AuditLog{}).Where("organization_id = ?", filter.OrganizationID)
+
+	// Apply filters
+	if filter.EventType != "" {
+		query = query.Where("event_type = ?", filter.EventType)
+	}
+	if filter.DocumentID != nil {
+		query = query.Where("document_id = ?", *filter.DocumentID)
+	}
+	if filter.UserID != nil {
+		query = query.Where("user_id = ?", *filter.UserID)
+	}
+	if filter.StartDate != nil && *filter.StartDate != "" {
+		query = query.Where("created_at >= ?", *filter.StartDate)
+	}
+	if filter.EndDate != nil && *filter.EndDate != "" {
+		query = query.Where("created_at <= ?", *filter.EndDate)
+	}
+
+	// Count total matching records
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, err
+	}
+
+	// Fetch paginated results
+	var logs []models.AuditLog
+	offset := (filter.Page - 1) * filter.PageSize
+	if err := s.db.Preload("User").Preload("Document").
+		Where("organization_id = ?", filter.OrganizationID).
+		Scopes(func(db *gorm.DB) *gorm.DB {
+			if filter.EventType != "" {
+				db = db.Where("event_type = ?", filter.EventType)
+			}
+			if filter.DocumentID != nil {
+				db = db.Where("document_id = ?", *filter.DocumentID)
+			}
+			if filter.UserID != nil {
+				db = db.Where("user_id = ?", *filter.UserID)
+			}
+			if filter.StartDate != nil && *filter.StartDate != "" {
+				db = db.Where("created_at >= ?", *filter.StartDate)
+			}
+			if filter.EndDate != nil && *filter.EndDate != "" {
+				db = db.Where("created_at <= ?", *filter.EndDate)
+			}
+			return db
+		}).
+		Order("created_at DESC").
+		Offset(offset).Limit(filter.PageSize).
+		Find(&logs).Error; err != nil {
+		return nil, err
+	}
+
+	totalPages := int(total) / filter.PageSize
+	if int(total)%filter.PageSize != 0 {
+		totalPages++
+	}
+
+	return &ActivityLogResult{
+		Logs:       logs,
+		Total:      total,
+		Page:       filter.Page,
+		PageSize:   filter.PageSize,
+		TotalPages: totalPages,
+	}, nil
+}

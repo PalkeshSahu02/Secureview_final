@@ -17,7 +17,6 @@ import {
 import { usersApi } from '../../api/users';
 import type { Invitation, UserRole } from '../../types';
 import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
 
 const InviteUser: React.FC = () => {
   const navigate = useNavigate();

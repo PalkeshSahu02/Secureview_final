@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { FileText, Upload, Search, Eye, Trash2, Share2, MoreVertical } from 'lucide-react';
+import { FileText, Upload, Search, Eye, Trash2, Share2 } from 'lucide-react';
 import { documentsApi } from '../../api/documents';
 import type { ListDocumentsResponse } from '../../api/documents';
 import type { Document } from '../../types';

@@ -97,6 +97,7 @@ export interface Invitation {
   role: UserRole;
   invited_by: string;
   status: InvitationStatus;
+  token?: string;
   expires_at: string;
   created_at: string;
   organization?: Organization;
@@ -199,6 +200,7 @@ export interface RegisterRequest {
 export interface RegisterResponse {
   organization: Organization;
   user: User;
+  session_id: string;
   access_token: string;
   refresh_token: string;
 }

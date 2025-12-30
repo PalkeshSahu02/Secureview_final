@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, UserPlus, Search, MoreVertical, Mail, Shield, UserX } from 'lucide-react';
+import { Users, UserPlus, Search, Mail, UserX } from 'lucide-react';
 import { usersApi } from '../../api/users';
 import type { ListUsersResponse } from '../../api/users';
 import type { User, UserRole } from '../../types';

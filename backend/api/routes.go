@@ -35,6 +35,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	userHandler := handlers.NewUserHandler(userService)
 	docHandler := handlers.NewDocumentHandler(docService)
 	viewerHandler := handlers.NewViewerHandler(viewerService)
+	activityHandler := handlers.NewActivityHandler(auditService)
 
 	// API v1 routes
 	v1 := router.Group("/api/v1")
@@ -78,6 +79,13 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	pinProtected.Use(middleware.AuthMiddleware(jwtManager, db))
 	pinProtected.Use(middleware.RequirePIN(db))
 	{
+		// Activity logs (org members can view)
+		activity := pinProtected.Group("/activity")
+		activity.Use(middleware.RequireOrgMember())
+		{
+			activity.GET("", activityHandler.ListActivity)
+		}
+
 		// User management (admin only)
 		users := pinProtected.Group("/users")
 		users.Use(middleware.RequireOrgAdmin())

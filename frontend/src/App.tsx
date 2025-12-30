@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 
@@ -20,6 +19,9 @@ import DocumentUpload from './pages/documents/DocumentUpload';
 // Users
 import UserList from './pages/users/UserList';
 import InviteUser from './pages/users/InviteUser';
+
+// Activity
+import ActivityLogs from './pages/activity/ActivityLogs';
 
 // Viewer
 import SecureViewer from './components/viewer/SecureViewer';
@@ -44,6 +46,7 @@ function App() {
             <Route path="/users" element={<UserList />} />
             <Route path="/invitations" element={<InviteUser />} />
             <Route path="/users/invite" element={<InviteUser />} />
+            <Route path="/activity" element={<ActivityLogs />} />
             <Route path="/settings" element={<Dashboard />} />
           </Route>
 

@@ -8,6 +8,7 @@ import MainLayout from './components/layout/MainLayout';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import VerifyPIN from './pages/auth/VerifyPIN';
+import AcceptInvitation from './pages/auth/AcceptInvitation';
 
 // Dashboard
 import Dashboard from './pages/dashboard/Dashboard';
@@ -23,6 +24,12 @@ import InviteUser from './pages/users/InviteUser';
 // Activity
 import ActivityLogs from './pages/activity/ActivityLogs';
 
+// Settings
+import Settings from './pages/settings/Settings';
+
+// Help
+import Help from './pages/help/Help';
+
 // Viewer
 import SecureViewer from './components/viewer/SecureViewer';
 
@@ -35,6 +42,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-pin" element={<VerifyPIN />} />
+          <Route path="/accept-invite" element={<AcceptInvitation />} />
 
           {/* Protected routes */}
           <Route element={<MainLayout />}>
@@ -47,7 +55,12 @@ function App() {
             <Route path="/invitations" element={<InviteUser />} />
             <Route path="/users/invite" element={<InviteUser />} />
             <Route path="/activity" element={<ActivityLogs />} />
-            <Route path="/settings" element={<Dashboard />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/settings/profile" element={<Settings />} />
+            <Route path="/settings/security" element={<Settings />} />
+            <Route path="/settings/notifications" element={<Settings />} />
+            <Route path="/settings/appearance" element={<Settings />} />
+            <Route path="/help" element={<Help />} />
           </Route>
 
           {/* Secure viewer (full screen, outside layout) */}
